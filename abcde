@@ -533,6 +533,7 @@ makeids ()
 		*musicbrainz*)
 			# FIXME: don't assume the first track is 1
 			MBDISCID=$($MUSICBRAINZ --command calcid --discinfo 1 $TRACKS $LEADIN $(($PREGAP + $LEADOUT)) $OFFSETS)
+			echo $MBDISCID > ${MYOUTPUTDIR}/${CDDBDISCID}/MBID.calculated
 			error=$?
 			if [ $error != 0 ]; then
 				log error "$MUSICBRAINZ failed to run; ABORT"
@@ -1882,6 +1883,7 @@ do_playlist ()
 			cat "${ABCDETEMPDIR}/PLAYLISTFILE.tmp" | sed 's/\//\\/' > "$OUTPUTDIR/$PLAYLISTFILE"
 		fi
 		echo "playlistcomplete" >> "${ABCDETEMPDIR}/status"
+                cp $OUTPUTDIR/$PLAYLISTFILE ${MYOUTPUTDIR}/${CDDBDISCID}/playlist.calculated
 	done
 }
 
@@ -3217,6 +3219,8 @@ do_getalbumart()
 				# try musicbrainz mbid
 				if [ -s "${ABCDETEMPDIR}/mbid.$(checkstatus cddb-choice)" ]; then
 					MBID=$(cat "${ABCDETEMPDIR}/mbid.$(checkstatus cddb-choice)")
+					echo $MBID > ${MYOUTPUTDIR}/${CDDBDISCID}/MBID
+
 					vecho "trying to get cover from coverartarchive.orq with musicbrainz mbid $MBID" >&2
 					ALBUMARTURL="http://coverartarchive.org/release/$MBID/front"
 					vecho "cover URL: $ALBUMARTURL" >&2
@@ -3339,6 +3343,7 @@ do_getalbumart()
 				mkdir -p "$FINALALBUMARTDIR"
 				cp "${ABCDETEMPDIR}/$ALBUMARTFILE" "$FINALALBUMARTDIR"
 			done
+                        cp "${ABCDETEMPDIR}/$ALBUMARTFILE" ${MYOUTPUTDIR}/${CDDBDISCID}/
 			rm -f "${ABCDETEMPDIR}/$ALBUMARTFILE"
 			echo "get-album-art=$ALBUMARTURL" >> "${ABCDETEMPDIR}/status"
 		else
