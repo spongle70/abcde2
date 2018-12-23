@@ -2042,7 +2042,7 @@ abcde.mkcue () {
 		printf "  TRACK %02i AUDIO\n" $i
 		if [ "$i" -eq 1 ] && [ "$1" -ne 150 ] ; then
 			if [ "$MODE" = PREGAP ] ; then
-				echomsf "    PREGAP " $(($"OFFSET" - 150))
+				echomsf "    PREGAP " $(($OFFSET - 150))
 			else
 				echo    "    INDEX 00 00:00:00"
 			fi
