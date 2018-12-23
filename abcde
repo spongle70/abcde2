@@ -1970,20 +1970,19 @@ abcde.cue2discid () {
 }
 
 # abcde.mkcue
-# abcde.mkcue [--wholedisk]
 # This creates a cuefile directly from the extended discid information
-# The --wholedisk option controls whether we're ripping data from the
+# The ONETRACK variable controls whether we're ripping data from the
 # start of track one or from the start of the disk (usually, but not
 # always the same thing!)
 #
 # Track one leadin/pregap (if any) handeling:
-# --wholedisk specified:
+# ONETRACK = y
 #   TRACK 01 AUDIO
 #     INDEX 00 00:00:00
 #     INDEX 01 <pregap value>
 #   Remaining track index values unchanged from disc TOC
 #
-# --wholedisk not specified
+# ONETRACK != y
 #   TRACK 01 AUDIO
 #     PREGAP <pregap value>
 #     INDEX 01 00:00:00
@@ -2001,7 +2000,7 @@ abcde.mkcue () {
 	local i OFFSET LBA
 	local CUEWAVFILE
 
-	if [ "$1" = "--wholedisk" ] ; then
+	if [ "$ONETRACK" = "y" ]; then
 		MODE=INDEX
 	else
 		MODE=PREGAP
@@ -2085,8 +2084,16 @@ do_discid ()
 								OFFSETS="$OFFSETS $(( 10#${OFFSETTIME:0:2} * 4500 + 10#${OFFSETTIME:3:2} * 75 + 10#${OFFSETTIME:6:2} ))"
 							done
 
+							# Remove leading space
+							OFFSETS="${OFFSETS# }"
+
 							LEADOUT=$(( $(echo "$CUESHEET" | grep lead-out | get_last) * 75 / 44100 ))
 							LEADIN=$(( $(echo "$CUESHEET" | grep lead-in | get_last) * 75 / 44100 ))
+							PREGAP=${OFFSETS%% *}
+
+							# Fixup leadout if pregap is non-zero
+							LEADOUT=$(( $LEADOUT - $PREGAP ))
+
 							makeids
 						;;
 						*)
